@@ -63,7 +63,11 @@ router.get("/category", function (req, res) {
         // 取值不能小于1
         page = Math.max(page, 1);
         let skip = (page - 1) * limit;
-        Category.find().limit(limit).skip(skip).then(function (categories) {
+        /**
+         * 1升序
+         * -1降序
+         */
+        Category.find().sort({_id: -1}).limit(limit).skip(skip).then(function (categories) {
             res.render("admin/category_index", {
                 userInfo: req.userInfo,
                 categories: categories,
@@ -153,7 +157,7 @@ router.get('/category/edit', function (req, res) {
 /*
  * 分类的修改保存
  * */
-router.post('/category/edit', function(req, res) {
+router.post('/category/edit', function (req, res) {
 
     //获取要修改的分类的信息，并且用表单的形式展现出来
     var id = req.query.id || '';
@@ -163,7 +167,7 @@ router.post('/category/edit', function(req, res) {
     //获取要修改的分类信息
     Category.findOne({
         _id: id
-    }).then(function(category) {
+    }).then(function (category) {
         if (!category) {
             res.render('admin/error', {
                 userInfo: req.userInfo,
@@ -187,7 +191,7 @@ router.post('/category/edit', function(req, res) {
                 });
             }
         }
-    }).then(function(sameCategory) {
+    }).then(function (sameCategory) {
         if (sameCategory) {
             res.render('admin/error', {
                 userInfo: req.userInfo,
@@ -201,7 +205,7 @@ router.post('/category/edit', function(req, res) {
                 name: name
             });
         }
-    }).then(function() {
+    }).then(function () {
         res.render('admin/success', {
             userInfo: req.userInfo,
             msg: '修改成功',
@@ -213,9 +217,9 @@ router.post('/category/edit', function(req, res) {
 
 
 // 删除分类
-router.get("/category/del",function (req,res) {
+router.get("/category/del", function (req, res) {
     let id = req.query.id || "";
-     Category.remove({
+    Category.remove({
         _id: id
     }).then(function () {
         res.render('admin/success', {
