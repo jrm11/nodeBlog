@@ -86,7 +86,7 @@ router.get("/category/add", function (req, res) {
  * */
 
 
-router.post('/category/add', function(req, res) {
+router.post('/category/add', function (req, res) {
 
     var name = req.body.name || '';
 
@@ -101,7 +101,7 @@ router.post('/category/add', function(req, res) {
     //数据库中是否已经存在同名分类名称
     Category.findOne({
         name: name
-    }).then(function(rs) {
+    }).then(function (rs) {
         if (rs) {
             //数据库中已经存在该分类了
             res.render('admin/error', {
@@ -115,7 +115,7 @@ router.post('/category/add', function(req, res) {
                 name: name
             }).save();
         }
-    }).then(function(newCategory) {
+    }).then(function (newCategory) {
         res.render('admin/success', {
             userInfo: req.userInfo,
             msg: '分类保存成功',
@@ -124,6 +124,105 @@ router.post('/category/add', function(req, res) {
     })
 
 });
+// 分类修改
+router.get('/category/edit', function (req, res) {
+
+    let id = req.query.id || "";
+    console.log(id);
+    Category.findOne({
+        _id: id
+    }).then(function (category) {
+        console.log(category);
+        if (!category) {
+            res.render('admin/error', {
+                userInfo: req.userInfo,
+                msg: "分类不存在"
+            })
+            return Promise.reject()
+        } else {
+            res.render('admin/category_edit', {
+                userInfo: req.userInfo,
+                category: category
+            })
+        }
+    })
+})
 
 
+// 分类修改的保存
+/*
+ * 分类的修改保存
+ * */
+router.post('/category/edit', function(req, res) {
+
+    //获取要修改的分类的信息，并且用表单的形式展现出来
+    var id = req.query.id || '';
+    //获取post提交过来的名称
+    var name = req.body.name || '';
+
+    //获取要修改的分类信息
+    Category.findOne({
+        _id: id
+    }).then(function(category) {
+        if (!category) {
+            res.render('admin/error', {
+                userInfo: req.userInfo,
+                msg: '分类信息不存在'
+            });
+            return Promise.reject();
+        } else {
+            //当用户没有做任何的修改提交的时候
+            if (name == category.name) {
+                res.render('admin/success', {
+                    userInfo: req.userInfo,
+                    msg: '修改成功',
+                    url: '/admin/category'
+                });
+                return Promise.reject();
+            } else {
+                //要修改的分类名称是否已经在数据库中存在
+                return Category.findOne({
+                    _id: {$ne: id},
+                    name: name
+                });
+            }
+        }
+    }).then(function(sameCategory) {
+        if (sameCategory) {
+            res.render('admin/error', {
+                userInfo: req.userInfo,
+                msg: '数据库中已经存在同名分类'
+            });
+            return Promise.reject();
+        } else {
+            return Category.update({
+                _id: id
+            }, {
+                name: name
+            });
+        }
+    }).then(function() {
+        res.render('admin/success', {
+            userInfo: req.userInfo,
+            msg: '修改成功',
+            url: '/admin/category'
+        });
+    })
+
+});
+
+
+// 删除分类
+router.get("/category/del",function (req,res) {
+    let id = req.query.id || "";
+     Category.remove({
+        _id: id
+    }).then(function () {
+        res.render('admin/success', {
+            userInfo: req.userInfo,
+            msg: '删除成功',
+            url: '/admin/category'
+        });
+    })
+})
 module.exports = router;
