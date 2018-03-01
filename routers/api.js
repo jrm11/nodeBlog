@@ -3,6 +3,7 @@
  */
 const express = require("express");
 const User = require('../models/User');
+const Content = require('../models/Content');
 
 const router = express.Router();
 
@@ -107,5 +108,42 @@ router.get('/user/logout', function (req, res) {
     req.cookies.set("userInfo", null);
     reqData.msg = "退出成功";
     res.json(reqData);
+});
+
+/*
+ * 获取指定文章的所有评论
+ * */
+router.get('/comment', function(req, res) {
+    var contentId = req.query.contentid || '';
+
+    Content.findOne({
+        _id: contentId
+    }).then(function(content) {
+        reqData.data = content.comments;
+        res.json(reqData);
+    })
+});
+
+
+// 评论提交
+router.post('/comment/post', function (req, res) {
+    // 内容id
+    let contentId = req.body.contentid || "";
+    let postData = {
+        username: req.userInfo.username,
+        postTime: new Date(),
+        content: req.body.content
+    }
+// 查询这篇文章的内容信息
+    Content.findOne({
+        _id:contentId
+    }).then(function (content) {
+        content.comments.push(postData);
+        return content.save();
+    }).then(function (newConent) {
+        reqData.msg = '评论成功';
+        reqData.data = newConent;
+        res.json(reqData)
+    })
 });
 module.exports = router;

@@ -12,7 +12,6 @@ let User = require("./models/User");
 // 设置静态文件托管
 app.use('/public', express.static(__dirname + '/public'));
 
-
 // 配置模板引擎
 // 第一个参数，模板名称，也是文件后缀 第二各参数解析模板的方法
 app.engine('html', swig.renderFile);
@@ -57,3 +56,5 @@ mongoose.connect('mongodb://localhost:27018/blog', function (err) {
         app.listen(8081);
     }
 });
+
+
